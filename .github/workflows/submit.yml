@@ -1,0 +1,50 @@
+name: Submit to winget-pkgs
+
+# Triggered by addlicense core after a successful GoReleaser run.
+# Payload: { "version": "v1.1.0" }
+on:
+  repository_dispatch:
+    types: [addlicense-released]
+
+jobs:
+  submit:
+    name: wingetcreate — submit PR to microsoft/winget-pkgs
+    runs-on: windows-latest
+    steps:
+      - name: Extract version
+        id: version
+        shell: bash
+        run: |
+          VERSION="${{ github.event.client_payload.version }}"
+          # Strip leading 'v' — winget uses bare semver (1.0.0, not v1.0.0)
+          WINGET_VERSION="${VERSION#v}"
+          echo "tag=${VERSION}"                   >> "$GITHUB_OUTPUT"
+          echo "winget_version=${WINGET_VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Install wingetcreate
+        # wingetcreate is the official Microsoft tool for submitting manifests.
+        # Docs: https://github.com/microsoft/winget-create
+        run: dotnet tool install --global Microsoft.WingetCreate
+
+      - name: Build download URL matrix
+        id: urls
+        shell: bash
+        run: |
+          TAG="${{ steps.version.outputs.tag }}"
+          BASE="https://github.com/GregoireF/addlicense/releases/download/${TAG}"
+          # wingetcreate accepts comma-separated URLs; one per architecture.
+          URLS="${BASE}/addlicense_windows_amd64.zip,${BASE}/addlicense_windows_arm64.zip"
+          echo "urls=${URLS}" >> "$GITHUB_OUTPUT"
+
+      - name: Submit manifest via wingetcreate
+        # wingetcreate update generates the YAML manifests and opens a PR
+        # against microsoft/winget-pkgs automatically.
+        # --token: must have public_repo scope on microsoft/winget-pkgs.
+        env:
+          WINGET_TOKEN: ${{ secrets.WINGET_SUBMIT_TOKEN }}
+        run: |
+          wingetcreate update GregoireF.addlicense `
+            --version "${{ steps.version.outputs.winget_version }}" `
+            --urls "${{ steps.urls.outputs.urls }}" `
+            --token "$env:WINGET_TOKEN" `
+            --submit
