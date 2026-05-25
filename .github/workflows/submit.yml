@@ -26,7 +26,11 @@ jobs:
       - name: Install wingetcreate
         # wingetcreate is the official Microsoft tool for submitting manifests.
         # Docs: https://github.com/microsoft/winget-create
-        run: dotnet tool install --global Microsoft.WingetCreate
+        # Download from GitHub releases — the NuGet dotnet tool is not published.
+        run: |
+          $url = "https://github.com/microsoft/winget-create/releases/latest/download/wingetcreate.exe"
+          Invoke-WebRequest -Uri $url -OutFile "$env:RUNNER_TEMP\wingetcreate.exe"
+          Add-Content $env:GITHUB_PATH "$env:RUNNER_TEMP"
 
       - name: Build download URL matrix
         id: urls
