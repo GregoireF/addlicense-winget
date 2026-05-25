@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+# Copyright 2026 Grégoire Favreau
 name: Submit to winget-pkgs
 
 # Triggered by addlicense core after a successful GoReleaser run.

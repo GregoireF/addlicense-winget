@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: MIT
+# Copyright 2026 Grégoire Favreau
+license: MIT
+copyright: "Grégoire Favreau"
+ignore:
+  - vendor
+  - node_modules
+  - .git
+  - dist
+  - build
+  - "*.md"
+  - LICENSE
+  - .gitignore
+  - ".github/CODEOWNERS"

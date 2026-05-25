@@ -1,2 +1,4 @@
-﻿*.log
+﻿# SPDX-License-Identifier: MIT
+# Copyright 2026 Grégoire Favreau
+*.log
 .DS_Store
